@@ -1,0 +1,81 @@
+import java.util.*;
+
+public class RoundRobin_Simple {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.print("Enter number of processes: ");
+        int n = sc.nextInt();
+        System.out.print("Enter time quantum: ");
+        int tq = sc.nextInt();
+        
+        int[] at = new int[n];
+        int[] bt = new int[n];
+        int[] rt = new int[n];  // remaining time
+        int[] ct = new int[n];
+        int[] tat = new int[n];
+        int[] wt = new int[n];
+        
+        // Input
+        for (int i = 0; i < n; i++) {
+            System.out.print("Enter AT for P" + (i + 1) + ": ");
+            at[i] = sc.nextInt();
+            System.out.print("Enter BT for P" + (i + 1) + ": ");
+            bt[i] = sc.nextInt();
+            rt[i] = bt[i];
+        }
+        
+        Queue<Integer> queue = new LinkedList<>();
+        int time = 0, completed = 0;
+        boolean[] inQueue = new boolean[n];
+        
+        // Add first arrived process
+        queue.add(0);
+        inQueue[0] = true;
+        
+        while (completed < n) {
+            if (queue.isEmpty()) {
+                time++;
+                continue;
+            }
+            
+            int i = queue.poll();
+            
+            // Execute for time quantum or remaining time
+            int execTime = Math.min(rt[i], tq);
+            rt[i] -= execTime;
+            time += execTime;
+            
+            // Add newly arrived processes
+            for (int j = 0; j < n; j++) {
+                if (!inQueue[j] && at[j] <= time && rt[j] > 0) {
+                    queue.add(j);
+                    inQueue[j] = true;
+                }
+            }
+            
+            // Check if process completed
+            if (rt[i] == 0) {
+                completed++;
+                ct[i] = time;
+                tat[i] = ct[i] - at[i];
+                wt[i] = tat[i] - bt[i];
+            } else {
+                queue.add(i);  // Re-add to queue
+            }
+        }
+        
+        // Display
+        System.out.println("\nPID\tAT\tBT\tCT\tTAT\tWT");
+        float totalTAT = 0, totalWT = 0;
+        for (int i = 0; i < n; i++) {
+            System.out.println("P" + (i + 1) + "\t" + at[i] + "\t" + bt[i] + "\t" + 
+                             ct[i] + "\t" + tat[i] + "\t" + wt[i]);
+            totalTAT += tat[i];
+            totalWT += wt[i];
+        }
+        
+        System.out.println("\nAvg TAT: " + (totalTAT / n));
+        System.out.println("Avg WT: " + (totalWT / n));
+    }
+}
