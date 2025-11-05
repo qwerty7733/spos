@@ -1,0 +1,62 @@
+import java.util.*;
+
+public class SJF_Simple {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.print("Enter number of processes: ");
+        int n = sc.nextInt();
+        
+        int[] at = new int[n];
+        int[] bt = new int[n];
+        int[] rt = new int[n];  // remaining time
+        int[] ct = new int[n];
+        int[] tat = new int[n];
+        int[] wt = new int[n];
+        
+        // Input
+        for (int i = 0; i < n; i++) {
+            System.out.print("Enter AT for P" + (i + 1) + ": ");
+            at[i] = sc.nextInt();
+            System.out.print("Enter BT for P" + (i + 1) + ": ");
+            bt[i] = sc.nextInt();
+            rt[i] = bt[i];
+        }
+        
+        int time = 0, completed = 0;
+        
+        while (completed < n) {
+            int shortest = -1;
+            int minBT = Integer.MAX_VALUE;
+            
+            // Find shortest remaining time among arrived processes
+            for (int i = 0; i < n; i++) {
+                if (at[i] <= time && rt[i] > 0 && rt[i] < minBT) {
+                    minBT = rt[i];
+                    shortest = i;
+                }
+            }
+            
+            if (shortest == -1) {
+                time++;  // CPU idle
+            } else {
+                rt[shortest]--;
+                time++;
+                
+                if (rt[shortest] == 0) {
+                    completed++;
+                    ct[shortest] = time;
+                    tat[shortest] = ct[shortest] - at[shortest];
+                    wt[shortest] = tat[shortest] - bt[shortest];
+                }
+            }
+        }
+        
+        // Display
+        System.out.println("\nPID\tAT\tBT\tCT\tTAT\tWT");
+        for (int i = 0; i < n; i++) {
+            System.out.println("P" + (i + 1) + "\t" + at[i] + "\t" + bt[i] + "\t" + 
+                             ct[i] + "\t" + tat[i] + "\t" + wt[i]);
+        }
+    }
+}
