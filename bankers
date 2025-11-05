@@ -1,0 +1,120 @@
+import java.util.*;
+
+class Bankers {
+    private int[][] need, allocation, max;
+    private int[] available;
+    private int numProcesses, numResources;
+    
+    public void isSafe() {
+        inputData();
+        calculateNeed();
+        
+        boolean[] finished = new boolean[numProcesses];
+        int[] safeSequence = new int[numProcesses];
+        int[] work = available.clone(); // Working copy of available resources
+        int count = 0;
+        
+        // Find safe sequence
+        while (count < numProcesses) {
+            boolean found = false;
+            
+            for (int i = 0; i < numProcesses; i++) {
+                if (!finished[i] && canAllocate(i, work)) {
+                    // Allocate resources
+                    for (int j = 0; j < numResources; j++) {
+                        work[j] += allocation[i][j];
+                    }
+                    
+                    safeSequence[count++] = i;
+                    finished[i] = true;
+                    found = true;
+                    System.out.println("Process P" + i + " executed");
+                }
+            }
+            
+            // If no process could be allocated, system is unsafe
+            if (!found) {
+                break;
+            }
+        }
+        
+        // Display result
+        if (count == numProcesses) {
+            System.out.println("\nSystem is in SAFE state!");
+            System.out.print("Safe Sequence: ");
+            for (int i = 0; i < numProcesses; i++) {
+                System.out.print("P" + safeSequence[i]);
+                if (i < numProcesses - 1) System.out.print(" -> ");
+            }
+            System.out.println();
+        } else {
+            System.out.println("\nSystem is in UNSAFE state!");
+            System.out.println("Deadlock may occur.");
+        }
+    }
+    
+    // Check if process can be allocated resources
+    private boolean canAllocate(int process, int[] work) {
+        for (int j = 0; j < numResources; j++) {
+            if (need[process][j] > work[j]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    // Calculate Need matrix
+    private void calculateNeed() {
+        for (int i = 0; i < numProcesses; i++) {
+            for (int j = 0; j < numResources; j++) {
+                need[i][j] = max[i][j] - allocation[i][j];
+            }
+        }
+    }
+    
+    // Input all data
+    private void inputData() {
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.print("Enter number of processes: ");
+        numProcesses = sc.nextInt();
+        System.out.print("Enter number of resources: ");
+        numResources = sc.nextInt();
+        
+        // Initialize arrays
+        need = new int[numProcesses][numResources];
+        max = new int[numProcesses][numResources];
+        allocation = new int[numProcesses][numResources];
+        available = new int[numResources];
+        
+        // Input Allocation Matrix
+        System.out.println("\nEnter Allocation Matrix:");
+        for (int i = 0; i < numProcesses; i++) {
+            System.out.print("P" + i + ": ");
+            for (int j = 0; j < numResources; j++) {
+                allocation[i][j] = sc.nextInt();
+            }
+        }
+        
+        // Input Maximum Matrix
+        System.out.println("\nEnter Maximum Matrix:");
+        for (int i = 0; i < numProcesses; i++) {
+            System.out.print("P" + i + ": ");
+            for (int j = 0; j < numResources; j++) {
+                max[i][j] = sc.nextInt();
+            }
+        }
+        
+        // Input Available Resources
+        System.out.print("\nEnter Available Resources: ");
+        for (int j = 0; j < numResources; j++) {
+            available[j] = sc.nextInt();
+        }
+        
+        sc.close();
+    }
+    
+    public static void main(String[] args) {
+        new Bankers().isSafe();
+    }
+}
